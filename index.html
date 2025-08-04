@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ты самая красивая</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            padding: 15px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        h1 {
+            color: #d23669;
+            margin: 15px 0 25px;
+            font-size: 28px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .gif-container {
+            margin: 0 auto 20px;
+            width: 200px;
+            height: 200px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .gif-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .play-btn {
+            background: linear-gradient(45deg, #d23669, #ff4d8d);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(210, 54, 105, 0.4);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(210, 54, 105, 0.6);
+        }
+        .play-btn:active {
+            transform: translateY(1px);
+        }
+        .play-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255,255,255,0.3),
+                rgba(255,255,255,0)
+            );
+            transform: rotate(30deg);
+            transition: all 0.5s;
+        }
+        .play-btn:hover::before {
+            animation: shine 1.5s infinite;
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+        .play-btn i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        .lyrics-container {
+            min-height: 300px;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            position: relative;
+        }
+        .lyric-line {
+            margin: 18px 0;
+            font-size: 20px;
+            line-height: 1.5;
+            opacity: 0;
+            height: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            position: absolute;
+            width: calc(100% - 40px);
+            left: 20px;
+        }
+        .lyric-line.active {
+            opacity: 1;
+            height: auto;
+            transform: translateY(0);
+        }
+        .lyric-line.highlight {
+            color: #d23669;
+            font-weight: 600;
+            text-shadow: 0 0 8px rgba(210, 54, 105, 0.3);
+        }
+        .separator {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #d23669, transparent);
+            margin: 25px 0;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .separator.active {
+            opacity: 0.5;
+        }
+        /* Адаптивность */
+        @media (max-width: 500px) {
+            .lyric-line {
+                font-size: 18px;
+                margin: 15px 0;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .gif-container {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+    <!-- Иконки Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Ты самая красивая</h1>
+        
+        <!-- Ваша гифка -->
+        <div class="gif-container">
+            <img src="https://64.media.tumblr.com/0f0847dc0ed19ae4c5a83034e88880f0/tumblr_nc49fmXS9P1ssdryqo2_500.gif" alt="Анимация">
+        </div>
+        
+        <div class="player-controls">
+            <button class="play-btn" id="playBtn">
+                <i class="fas fa-play"></i> Слушать
+            </button>
+        </div>
+        
+        <audio id="audioPlayer">
+            <source src="https://github.com/FelsanProject/music-hots/raw/main/Mada_-_Ty_samaya_krasivaya_ty_samaya_zhelannaya_76833829.mp3" type="audio/mpeg">
+        </audio>
+        
+        <div class="lyrics-container" id="lyricsContainer">
+            <!-- Текст будет генерироваться автоматически -->
+        </div>
+    </div>
+
+    <script>
+        // Текст песни с таймингами (в секундах)
+        const lyrics = [
+            { text: "Смотришь в зеркало, ненавидишь себя", time: 9, type: "normal" },
+            { text: "Вечно загоняешься что тебя не любят", time: 11, type: "normal" },
+            { text: "Ты не слабый пол, ты сильна, а как же?", time: 13, type: "normal" },
+            { text: "Уж я то понимаю что ты так же", time: 16, type: "normal" },
+            { text: "---", time: 17, type: "separator" },
+            { text: "Ты самая красивая!", time: 18, type: "highlight" },
+            { text: "Ты самая желанная!", time: 20, type: "highlight" },
+            { text: "Ты самая любимая!", time: 22, type: "highlight" },
+            { text: "Ты счастье долгожданное!", time: 25, type: "highlight" },
+            { text: "Ты самая красивая!", time: 27, type: "highlight" },
+            { text: "Ты самая желанная!", time: 29, type: "highlight" },
+            { text: "Ты самая любимая!", time: 32, type: "highlight" },
+            { text: "Ты солнце прекрасное!", time: 34, type: "highlight" },
+            { text: "---", time: 35, type: "separator" },
+            { text: "Не искай себе, кто похвалит", time: 36, type: "normal" },
+            { text: "Эти слухи - разъедают", time: 38, type: "normal" },
+            { text: "Все печалит, время палит", time: 41, type: "normal" },
+            { text: "Оно не лечит, просто жалит", time: 43, type: "normal" },
+            { text: "Ты прекрасна как и есть", time: 45, type: "normal" },
+            { text: "Быть сильное это честь", time: 47, type: "normal" },
+            { text: "Твоё будущее это месть", time: 50, type: "normal" },
+            { text: "Для тех, кто не понял что ты", time: 52, type: "normal" },
+            { text: "---", time: 54, type: "separator" },
+            { text: "Ты самая красивая...", time: 55, type: "highlight" },
+            { text: "Ты самая желанная...", time: 57, type: "highlight" },
+            { text: "Ты самая любимая...", time: 59, type: "highlight" },
+            { text: "Ты счастье долгожданное...", time: 62, type: "highlight" },
+            { text: "Ты самая красивая...", time: 64, type: "highlight" },
+            { text: "Ты самая желанная...", time: 66, type: "highlight" },
+            { text: "Ты самая любимая...", time: 68, type: "highlight" },
+            { text: "Ты солнце прекрасное...", time: 71, type: "highlight" },
+            { text: "Ты самая красивая!", time: 73, type: "highlight" },
+            { text: "Ты самая желанная!", time: 75, type: "highlight" },
+            { text: "Ты самая любимая!", time: 77, type: "highlight" },
+            { text: "Ты счастье долгожданное!", time: 80, type: "highlight" },
+            { text: "Ты самая красивая!", time: 82, type: "highlight" },
+            { text: "Ты самая желанная!", time: 84, type: "highlight" },
+            { text: "Ты самая любимая!", time: 86, type: "highlight" },
+            { text: "Ты солнце прекрасное", time: 89, type: "highlight" },
+            { text: "---", time: 90, type: "separator" },
+            { text: "Улыбайся почаще", time: 91, type: "normal" },
+            { text: "Будто солнце наше", time: 93, type: "normal" },
+            { text: "А ты с каждым разом краше", time: 95, type: "normal" },
+            { text: "И ты та кто ночь уложит", time: 98, type: "normal" },
+            { text: "Ты самая прекрасная", time: 100, type: "normal" },
+            { text: "Сегодня солце ясное, и ты...", time: 103, type: "normal" },
+            { text: "Та кем всегда хотела быть", time: 107, type: "normal" },
+            { text: "Запомни...", time: 109, type: "normal" },
+            { text: "Ты самая красивая...", time: 110, type: "highlight" },
+            { text: "Ты самая желанная...", time: 112, type: "highlight" },
+            { text: "Ты самая любимая...", time: 114, type: "highlight" },
+            { text: "Ты счастье долгожданное...", time: 117, type: "highlight" },
+            { text: "Ты самая красивая...", time: 119, type: "highlight" },
+            { text: "Ты самая желанная...", time: 121, type: "highlight" },
+            { text: "Ты самая любимая...", time: 123, type: "highlight" },
+            { text: "Ты солнце прекрасное...", time: 125, type: "highlight" },
+            { text: "---", time: 125.15, type: "separator" },
+            { text: "ЛЕРА ЗАЙКА ЭТО ТЕБЕ<3", time: 126, type: "highlight" },
+        ];
+
+        const lyricsContainer = document.getElementById('lyricsContainer');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playBtn = document.getElementById('playBtn');
+        let isPlaying = false;
+
+        // Создаем элементы текста
+        lyrics.forEach(item => {
+            let element;
+            if (item.type === "separator") {
+                element = document.createElement('div');
+                element.className = 'separator';
+            } else {
+                element = document.createElement('div');
+                element.className = `lyric-line ${item.type === "highlight" ? "highlight" : ""}`;
+                element.textContent = item.text;
+            }
+            element.dataset.time = item.time;
+            lyricsContainer.appendChild(element);
+        });
+
+        // Функция обновления текста
+        function updateLyrics() {
+            const currentTime = audioPlayer.currentTime;
+            const allElements = document.querySelectorAll('.lyric-line, .separator');
+            
+            allElements.forEach(el => {
+                el.classList.remove('active');
+                const elTime = parseFloat(el.dataset.time);
+
+                if (!isNaN(elTime)) {
+                    if (currentTime >= elTime - 0.3 && currentTime < elTime + 1.5) {
+                        el.classList.add('active');
+                    }
+                }
+            });
+
+            if (isPlaying) {
+                requestAnimationFrame(updateLyrics);
+            }
+        }
+
+        // Управление кнопкой
+        playBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                audioPlayer.pause();
+                playBtn.innerHTML = '<i class="fas fa-play"></i> Продолжить';
+                isPlaying = false;
+            } else {
+                audioPlayer.play()
+                    .then(() => {
+                        playBtn.innerHTML = '<i class="fas fa-pause"></i> Пауза';
+                        isPlaying = true;
+                        updateLyrics();
+                    })
+                    .catch(e => {
+                        alert('Нажмите "Разрешить" для воспроизведения');
+                    });
+            }
+        });
+
+        // Обновление иконки при окончании трека
+        audioPlayer.addEventListener('ended', () => {
+            playBtn.innerHTML = '<i class="fas fa-play"></i> Слушать снова';
+            isPlaying = false;
+        });
+    </script>
+</body>
+</html>
